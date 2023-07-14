@@ -1,0 +1,61 @@
+m255
+K4
+z2
+!s11f vlog 2020.1 2020.02, Feb 28 2020
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+d/home/vladimir
+vserializer
+Z0 DXx6 sv_std 3 std 0 22 VYECXdT12H8WgbUP_5Y6:3
+Z1 !s110 1689357440
+!i10b 1
+!s100 [oT>fV7n9k58=QESfO[jY0
+Z2 !s11b Dg1SIo80bB@j0V0VzS_@n1
+I=DFi1]?JQL@==Kaj=GPfk2
+Z3 VDg1SIo80bB@j0V0VzS_@n1
+S1
+Z4 d/home/vladimir/Projects/Metrotek/Lab 1/Task 1/quartus_prj
+w1689357408
+8/home/vladimir/Projects/Metrotek/Lab 1/Task 1/rtl/serializer.sv
+F/home/vladimir/Projects/Metrotek/Lab 1/Task 1/rtl/serializer.sv
+!i122 26
+L0 1 58
+Z5 OV;L;2020.1;71
+r1
+!s85 0
+31
+Z6 !s108 1689357440.000000
+!s107 /home/vladimir/Projects/Metrotek/Lab 1/Task 1/rtl/serializer.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|/home/vladimir/Projects/Metrotek/Lab 1/Task 1/rtl/serializer.sv|
+!i113 1
+Z7 o-work work -sv
+Z8 tCvgOpt 0
+vserializer_tb
+R0
+R1
+!i10b 1
+!s100 oO<DZX7LSzY;Be`UV;`EA1
+R2
+IlD5?cMFa[hk4Ce>K3XKLI0
+R3
+S1
+R4
+w1689357436
+8/home/vladimir/Projects/Metrotek/Lab 1/Task 1/tb/serializer_tb.sv
+F/home/vladimir/Projects/Metrotek/Lab 1/Task 1/tb/serializer_tb.sv
+!i122 27
+L0 1 39
+R5
+r1
+!s85 0
+31
+R6
+!s107 /home/vladimir/Projects/Metrotek/Lab 1/Task 1/tb/serializer_tb.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|/home/vladimir/Projects/Metrotek/Lab 1/Task 1/tb/serializer_tb.sv|
+!i113 1
+R7
+R8
