@@ -1,1 +1,8 @@
+{/home/vladimir/Projects/Metrotek/Lab 1/Task 1/rtl/serializer.sv} {1 {vlog -work work -sv -stats=none {/home/vladimir/Projects/Metrotek/Lab 1/Task 1/rtl/serializer.sv}
+Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+-- Compiling module serializer
 
+Top level modules:
+	serializer
+
+} {} {}}
