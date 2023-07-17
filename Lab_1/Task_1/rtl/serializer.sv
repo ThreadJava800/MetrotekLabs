@@ -18,6 +18,7 @@ logic [4:0] num_cnt;
 logic [3:0] data_mod_cpy;
 logic finished;
 
+// this block recognises if output is finished or not
 always_comb 
   begin
     if ( ( data_val_i ) && ( !busy_o ) )
@@ -29,8 +30,11 @@ always_comb
         data_mod_cpy = data_mod_i;
         if ( !data_mod_i )
           data_mod_cpy = MAX_WORD_LEN;
+          
       end
-    if ( (num_cnt == data_mod_cpy + 1'b1) )
+
+    // set finished to 1 if reset is present, or we finished sending numbers  
+    if ( (num_cnt == data_mod_cpy + 1'b1) || ( srst_i ) )
       finished = 1'b1;
   end
 
@@ -48,6 +52,7 @@ always_ff @( posedge clk_i )
       end
   end
 
+// on output finished block
 always_ff @( posedge clk_i )
   begin
     if ( finished )
