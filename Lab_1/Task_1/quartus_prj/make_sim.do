@@ -1,10 +1,6 @@
-vlib work
+vlog -sv ../rtl/serializer.sv
+vlog -sv ../tb/serializer_tb.sv
 
-vlog -sv counter.sv
-vlog -sv top_tb.sv
+vsim -gui -l /dev/null work.serializer_tb
 
-vsim -novopt top_tb
-
-add log -r /*
 add wave -r *
-run -all

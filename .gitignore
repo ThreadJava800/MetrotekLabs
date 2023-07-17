@@ -37,6 +37,7 @@
 *.html
 *.jdi
 *.jpg
+*.mpf
 # *.mif
 *.pin
 *.pof
@@ -53,6 +54,7 @@
 *.txt # Explicitly add any text files used
 *~
 *example*
+*transcript*
 *sopc_*
 # *.sdc # I want those timing files
 
@@ -63,6 +65,7 @@
 */timing/
 */testbench/
 */*_sim/
+work/
 incremental_db/
 db/
 _output_files/
