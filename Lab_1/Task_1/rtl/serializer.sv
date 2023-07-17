@@ -14,9 +14,25 @@ module serializer #(
   output logic         busy_o 
 );
 
-logic [3:0] num_cnt;
-logic       valid_mod;
+logic [4:0] num_cnt;
+logic [3:0] data_mod_cpy;
+logic finished;
 
+always_comb 
+  begin
+    if ( ( data_val_i ) && ( !busy_o ) )
+      begin
+        finished = 1'b0;
+
+        // set  data_mod_cpy to MAX (15) if data_mod = 0
+        // else data_mod_cpy = data_mod
+        data_mod_cpy = data_mod_i;
+        if ( !data_mod_i )
+          data_mod_cpy = MAX_WORD_LEN;
+      end
+    if ( (num_cnt == data_mod_cpy + 1'b1) )
+      finished = 1'b1;
+  end
 
 // reset block
 always_ff @( posedge clk_i )
@@ -27,41 +43,33 @@ always_ff @( posedge clk_i )
         ser_data_o     <= 16'b0;
         ser_data_val_o <= 1'b0;  // data not valid
         busy_o         <= 1'b0;  // module is not busy
+
+        num_cnt        <= 4'b0;
       end
   end
 
-// data_val_i active (1 clock) => start new calculation
 always_ff @( posedge clk_i )
   begin
-    if ( ( data_val_i ) && ( !busy_o ) )
+    if ( finished )
       begin
-        busy_o         <= 1'b1;  // module is busy
+        busy_o         <= 1'b0;
         ser_data_val_o <= 1'b0;
+        ser_data_o     <= 1'b0;
 
-        // set  num_cnt to MAX (15) if data_mod = 0
-        // else num_cnt = data_mod
-        num_cnt <= data_mod_i;
-        if ( !data_mod_i )
-          num_cnt <= MAX_WORD_LEN;
+        num_cnt        <= 4'b0;
       end
   end
 
-// main calculation block
+// main logic block
 always_ff @( posedge clk_i )
   begin
-    if ( num_cnt > 0 )
+    if ( !finished )
       begin
+        busy_o <= 1'b1;
+
         ser_data_o     <= data_i[MAX_WORD_LEN - num_cnt];
         ser_data_val_o <= 1'b1;
-
-        num_cnt        <= num_cnt - 1'b1;  // move to next number
-      end
-    else
-      begin
-        // last number, so setting busy to 0
-        ser_data_o     <= data_i[MAX_WORD_LEN];
-        ser_data_val_o <= 1'b0;
-        busy_o         <= 1'b0;
+        num_cnt        <= num_cnt + 1'b1;  // move to next number
       end
   end
 

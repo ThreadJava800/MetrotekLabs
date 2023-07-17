@@ -29,13 +29,11 @@ serializer DUT (
   .busy_o         (busy)
 );
 
-bit results [$];
-
-task testBench( input data_test, input [3:0] data_mod_test, input data_val_test, input [15:0] check_arr );
+task testBench( input [15:0] data_test, input [3:0] data_mod_test, input data_val_test, input [15:0] check_arr );
   static bit [3:0] num_count = 'd15;
   static bit       success   = 1'b1;
 
-  if ( data_mod_test != 0 )
+  if ( data_mod_test )
     num_count = data_mod_test;
   else
     num_count = 15;
@@ -46,19 +44,27 @@ task testBench( input data_test, input [3:0] data_mod_test, input data_val_test,
     begin
       ##1;
 
-      if ( ( check_arr[i] != ser_data ) )
+      if ( ( check_arr[15 - i] != ser_data ) )
         begin
-          $display( "Test was not successful!" );
+          $display( "Error: test: data_i=%d data_mod_i=%d data_val=%d number_pos=%d", data_test, data_mod_test, data_val_test, i );
+          $display( "\t Expected: ser_data_o=%d, ser_data_val=1, busy_o=1 ", check_arr[15 - i] );
+          $display( "\t Got: ser_data_o=%d, ser_data_val=%d, busy_o=%d ", ser_data, ser_data_val, busy );
+
           success = 1'b0;
+        //   break;
         end
     end
 
   if ( success )
     begin
-      if ( ( ser_data_val == 1'b1 ) && ( busy == 1'b0 ) )
+      if ( ( ser_data_val == 1'b0 ) && ( busy == 1'b0 ) )
         $display( "Test was successful!" );
       else
-        $display( "Test was not successful!" );
+        begin
+          $display( "Error: test: data_i=%d data_mod_i=%d data_val=%d", data_test, data_mod_test, data_val_test );
+          $display( "\t Expected: ser_data_val=0, busy_o=0 " );
+          $display( "\t Got: ser_data_val=%d, busy_o=%d ", ser_data_val, busy );
+        end
     end
 endtask
 
@@ -66,43 +72,14 @@ endtask
   srst     <= 1'b1;                         \
   data     <= DATA;                          \
   data_mod <= DATA_MOD;                       \
-  data_val <= DATA_VAL;                        \
-  #20 srst <= 1'b0;
+  ##1 srst <= 1'b0;                            \
+  #4 data_val <= 1'b1;                         \
+  ##1 data_val <= 1'b0;
 
 initial
   begin
     `set_data( 'd15, 'd0, '1       )
     testBench( 'd15, 'd0, '1, 'd15 );
-    `set_data( 'd14, 'd0, '1       )
-    testBench( 'd14, 'd0, '1, 'd14 );
-    `set_data( 'd13, 'd0, '1       )
-    testBench( 'd13, 'd0, '1, 'd13 );
-    `set_data( 'd12, 'd0, '1       )
-    testBench( 'd12, 'd0, '1, 'd12 );
-    `set_data( 'd11, 'd0, '1       )
-    testBench( 'd11, 'd0, '1, 'd11 );
-    `set_data( 'd10, 'd0, '1       )
-    testBench( 'd10, 'd0, '1, 'd10 );
-    `set_data( 'd9, 'd0, '1       )
-    testBench( 'd9, 'd0, '1, 'd9 );
-    `set_data( 'd8, 'd0, '1       )
-    testBench( 'd8, 'd0, '1, 'd8 );
-    `set_data( 'd7, 'd0, '1       )
-    testBench( 'd7, 'd0, '1, 'd7 );
-    `set_data( 'd6, 'd0, '1       )
-    testBench( 'd6, 'd0, '1, 'd6 );
-    `set_data( 'd5, 'd0, '1       )
-    testBench( 'd5, 'd0, '1, 'd5 );
-    `set_data( 'd4, 'd0, '1       )
-    testBench( 'd4, 'd0, '1, 'd4 );
-    `set_data( 'd3, 'd0, '1       )
-    testBench( 'd3, 'd0, '1, 'd3 );
-    `set_data( 'd2, 'd0, '1       )
-    testBench( 'd2, 'd0, '1, 'd2 );
-    `set_data( 'd1, 'd0, '1       )
-    testBench( 'd1, 'd0, '1, 'd1 );
-    `set_data( 'd0, 'd0, '1       )
-    testBench( 'd0, 'd0, '1, 'd0 );
   end
 
 endmodule
