@@ -17,50 +17,52 @@ module serializer #(
 logic [3:0] num_cnt;
 logic       valid_mod;
 
+
+// reset block
 always_ff @( posedge clk_i )
   begin
-      // синхронный сброс
-      if ( srst_i )
-        begin
-          ser_data_o     <= 1'b0;
-          busy_o         <= FALSE;
-          ser_data_val_o <= TRUE;
+    // reset => default state
+    if ( srst_i )
+      begin
+        ser_data_o     <= 16'b0;
+        ser_data_val_o <= 1'b0;  // data not valid
+        busy_o         <= 1'b0;  // module is not busy
+      end
+  end
 
-          valid_mod      <= TRUE;
+// data_val_i active (1 clock) => start new calculation
+always_ff @( posedge clk_i )
+  begin
+    if ( ( data_val_i ) && ( !busy_o ) )
+      begin
+        busy_o         <= 1'b1;  // module is busy
+        ser_data_val_o <= 1'b0;
 
-          if ( data_mod_i == 0 )
-            num_cnt <= MAX_WORD_LEN;
-          else
-            begin
-              if ( ( data_mod_i == 1 ) || ( data_mod_i == 2 ) )
-                valid_mod <= FALSE;
-              else
-                valid_mod <= TRUE;
+        // set  num_cnt to MAX (15) if data_mod = 0
+        // else num_cnt = data_mod
+        num_cnt <= data_mod_i;
+        if ( !data_mod_i )
+          num_cnt <= MAX_WORD_LEN;
+      end
+  end
 
-                num_cnt <= data_mod_i;
-            end
-        end
-      else
-        begin
-          if ( ( data_val_i ) && ( valid_mod ) )
-            begin
-              if ( num_cnt != 0 )
-                begin
-                  ser_data_o     <= data_i[MAX_WORD_LEN - num_cnt];
-                  busy_o         <= TRUE;
-                  ser_data_val_o <= FALSE;
+// main calculation block
+always_ff @( posedge clk_i )
+  begin
+    if ( num_cnt > 0 )
+      begin
+        ser_data_o     <= data_i[MAX_WORD_LEN - num_cnt];
+        ser_data_val_o <= 1'b1;
 
-                  num_cnt <= num_cnt - 1'b1;
-                end
-              else
-                begin
-                  ser_data_o     <= data_i[MAX_WORD_LEN];
-                  busy_o         <= FALSE;
-                  ser_data_val_o <= TRUE;
-                end
-            end
-        end
-
+        num_cnt        <= num_cnt - 1'b1;  // move to next number
+      end
+    else
+      begin
+        // last number, so setting busy to 0
+        ser_data_o     <= data_i[MAX_WORD_LEN];
+        ser_data_val_o <= 1'b0;
+        busy_o         <= 1'b0;
+      end
   end
 
 endmodule

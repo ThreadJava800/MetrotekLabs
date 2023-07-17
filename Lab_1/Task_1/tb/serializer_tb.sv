@@ -48,7 +48,7 @@ task testBench( input data_test, input [3:0] data_mod_test, input data_val_test,
 
       if ( ( check_arr[i] != ser_data ) )
         begin
-          display( "Test was not successful!" );
+          $display( "Test was not successful!" );
           success = 1'b0;
         end
     end
