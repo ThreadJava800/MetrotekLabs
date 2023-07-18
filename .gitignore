@@ -30,6 +30,7 @@
 *_generation_script*
 *_inst.vhd
 *.bak
+*.txt
 *.cmp
 *.done
 *.eqn
@@ -38,6 +39,7 @@
 *.jdi
 *.jpg
 *.mpf
+*.mti
 *.wlf
 # *.mif
 *.pin
@@ -46,6 +48,8 @@
 *.qar
 *.qarlog
 *.qws
+*.qpf
+*.qsf
 *.rpt
 *.smsg
 *.sof
@@ -67,6 +71,8 @@
 */testbench/
 */*_sim/
 work/
+output_files/
+simulation/
 incremental_db/
 db/
 _output_files/
