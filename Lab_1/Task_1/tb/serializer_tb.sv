@@ -49,6 +49,8 @@ initial
 
         ##1;
 
+        data_val <= 1'b0;
+
         for ( int i = 0; i <= testMod; i++ )
           begin
             // $display ("%d %d %d", testValue, testValue[15 - i], ser_data);

@@ -1,8 +1,4 @@
-module serializer #(
-  parameter MAX_WORD_LEN = 4'd15,
-  parameter TRUE         = 1'b1,
-  parameter FALSE        = 1'b0
-)(
+module serializer (
   input  logic         clk_i,
   input  logic         srst_i,
   input  logic [15:0]  data_i,
@@ -14,28 +10,36 @@ module serializer #(
   output logic         busy_o 
 );
 
+localparam MAX_WORD_LEN = 4'd15;
+
 logic [4:0] num_cnt;
 logic [3:0] data_mod_cpy;
-logic finished;
+bit finished;
 
 // this block recognises if output is finished or not
 always_comb 
   begin
-    if ( ( data_val_i ) && ( !busy_o ) )
-      begin
-        finished = 1'b0;
+    // set  data_mod_cpy to MAX (15) if data_mod = 0
+    // else data_mod_cpy = data_mod
+    data_mod_cpy = data_mod_i;
+    if ( !data_mod_i )
+        data_mod_cpy = MAX_WORD_LEN;
 
-        // set  data_mod_cpy to MAX (15) if data_mod = 0
-        // else data_mod_cpy = data_mod
-        data_mod_cpy = data_mod_i;
-        if ( !data_mod_i )
-          data_mod_cpy = MAX_WORD_LEN;
-          
-      end
+    if ( ( data_val_i ) && ( !busy_o ) )
+        finished = 1'b0;
 
     // set finished to 1 if reset is present, or we finished sending numbers  
     if ( (num_cnt == data_mod_cpy + 1'b1) || ( srst_i ) )
       finished = 1'b1;
+
+    // needed for correct work of combinational logic
+    else
+      begin
+        if ( finished )
+          finished = 1'b1;
+        else
+          finished = 1'b0;
+      end
   end
 
 // reset block
@@ -44,17 +48,13 @@ always_ff @( posedge clk_i )
     // reset => default state
     if ( srst_i )
       begin
-        ser_data_o     <= 16'b0;
+        ser_data_o     <= 1'b0;
         ser_data_val_o <= 1'b0;  // data not valid
         busy_o         <= 1'b0;  // module is not busy
 
         num_cnt        <= 4'b0;
       end
-  end
 
-// on output finished block
-always_ff @( posedge clk_i )
-  begin
     if ( finished )
       begin
         busy_o         <= 1'b0;
@@ -63,11 +63,7 @@ always_ff @( posedge clk_i )
 
         num_cnt        <= 4'b0;
       end
-  end
 
-// main logic block
-always_ff @( posedge clk_i )
-  begin
     if ( !finished )
       begin
         busy_o <= 1'b1;
