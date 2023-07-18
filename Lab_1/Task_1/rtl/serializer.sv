@@ -63,8 +63,7 @@ always_ff @( posedge clk_i )
 
         num_cnt        <= 4'b0;
       end
-
-    if ( !finished )
+    else
       begin
         busy_o <= 1'b1;
 
