@@ -1,6 +1,9 @@
 vlog -sv ../rtl/serializer.sv
 vlog -sv ../tb/serializer_tb.sv
 
-vsim -gui -l /dev/null work.serializer_tb
+vsim -c work.serializer_tb
 
+add log -r *
 add wave -r *
+
+run 1500
