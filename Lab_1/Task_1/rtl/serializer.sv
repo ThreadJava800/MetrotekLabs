@@ -1,8 +1,10 @@
-module serializer (
+module serializer #(
+  parameter DATA_W = 15
+) (
   input  logic         clk_i,
   input  logic         srst_i,
   input  logic [15:0]  data_i,
-  input  logic [3:0 ]  data_mod_i,
+  input  logic [( $clog2(DATA_W) - 1 ):0 ]  data_mod_i,
   input  logic         data_val_i,
 
   output logic         ser_data_o,
@@ -12,8 +14,8 @@ module serializer (
 
 localparam MAX_WORD_LEN = 4'd15;
 
-logic [4:0] num_cnt;
-logic [3:0] data_mod_cpy;
+logic [( $clog2(DATA_W)     ):0] num_cnt;
+logic [( $clog2(DATA_W) - 1 ):0] data_mod_cpy;
 bit finished;
 
 // this block recognises if output is finished or not
@@ -29,7 +31,10 @@ always_comb
         finished = 1'b0;
 
     // set finished to 1 if reset is present, or we finished sending numbers  
-    if ( (num_cnt == data_mod_cpy + 1'b1) || ( srst_i ) )
+    if ( (num_cnt == data_mod_cpy + 1'b1) )
+      finished = 1'b1;
+
+    if ( srst_i )
       finished = 1'b1;
 
     // needed for correct work of combinational logic
@@ -42,7 +47,6 @@ always_comb
       end
   end
 
-// reset block
 always_ff @( posedge clk_i )
   begin
     // reset => default state
