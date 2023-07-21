@@ -54,7 +54,7 @@ initial
         for ( int i = 0; i <= testMod; i++ )
           begin
             // $display ("%d %d %d", testValue, testValue[15 - i], ser_data);
-            if ( ser_data != testValue[15 - i] )
+            if ( ( ser_data != testValue[15 - i] ) || ( !ser_data_val ) || ( !busy ) )
               begin
                 $display( "Error: test: data_i=%d data_mod_i=%d number_pos=%d", testValue, testMod, i );
                 $display( "\t Expected: ser_data_o=%d, ser_data_val=1, busy_o=1 ", testValue[15 - i] );

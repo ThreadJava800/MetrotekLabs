@@ -1,15 +1,15 @@
 module serializer #(
   parameter DATA_W = 15
 ) (
-  input  logic         clk_i,
-  input  logic         srst_i,
-  input  logic [15:0]  data_i,
+  input  logic                              clk_i,
+  input  logic                              srst_i,
+  input  logic [15:0]                       data_i,
   input  logic [( $clog2(DATA_W) - 1 ):0 ]  data_mod_i,
-  input  logic         data_val_i,
+  input  logic                              data_val_i,
 
-  output logic         ser_data_o,
-  output logic         ser_data_val_o,
-  output logic         busy_o 
+  output logic                              ser_data_o,
+  output logic                              ser_data_val_o,
+  output logic                              busy_o 
 );
 
 localparam MAX_WORD_LEN = 4'd15;
@@ -25,16 +25,16 @@ always_comb
     // else data_mod_cpy = data_mod
     data_mod_cpy = data_mod_i;
     if ( !data_mod_i )
-        data_mod_cpy = MAX_WORD_LEN;
+      data_mod_cpy = MAX_WORD_LEN;
 
     if ( ( data_val_i ) && ( !busy_o ) )
-        finished = 1'b0;
+      finished = 1'b0;
+
+    if ( srst_i )
+      finished = 1'b1;
 
     // set finished to 1 if reset is present, or we finished sending numbers  
     if ( (num_cnt == data_mod_cpy + 1'b1) )
-      finished = 1'b1;
-
-    if ( srst_i )
       finished = 1'b1;
 
     // needed for correct work of combinational logic
