@@ -18,33 +18,29 @@ logic [( $clog2(DATA_W)     ):0] num_cnt;
 logic [( $clog2(DATA_W) - 1 ):0] data_mod_cpy;
 bit finished;
 
+always_comb
+  begin
+    if ( !data_mod_i )
+      data_mod_cpy = MAX_WORD_LEN;
+    else
+      data_mod_cpy = data_mod_i;
+  end
+
 // this block recognises if output is finished or not
 always_comb 
   begin
-    // set  data_mod_cpy to MAX (15) if data_mod = 0
-    // else data_mod_cpy = data_mod
-    data_mod_cpy = data_mod_i;
-    if ( !data_mod_i )
-      data_mod_cpy = MAX_WORD_LEN;
-
-    if ( ( data_val_i ) && ( !busy_o ) )
-      finished = 1'b0;
-
     if ( srst_i )
       finished = 1'b1;
-
-    // set finished to 1 if reset is present, or we finished sending numbers  
-    if ( (num_cnt == data_mod_cpy + 1'b1) )
+    else if ( ( data_val_i ) )
+      finished = 1'b0;
+    else if ( (num_cnt == data_mod_cpy + 1'b1) )
+      // finished sending numbers  
       finished = 1'b1;
-
-    // needed for correct work of combinational logic
     else
-      begin
-        if ( finished )
-          finished = 1'b1;
-        else
-          finished = 1'b0;
-      end
+      if ( busy_o )
+        finished = 1'b0;
+      else
+        finished = 1'b1;
   end
 
 // ser_data_o block
