@@ -6,4 +6,4 @@ vsim -c work.serializer_tb
 add log -r *
 add wave -r *
 
-run 90000
+run 9000000

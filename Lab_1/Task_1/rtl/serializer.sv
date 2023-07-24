@@ -1,9 +1,9 @@
 module serializer #(
-  parameter DATA_W = 15
+  parameter DATA_W = 4'd15
 ) (
   input  logic                              clk_i,
   input  logic                              srst_i,
-  input  logic [15:0]                       data_i,
+  input  logic [DATA_W:0]                   data_i,
   input  logic [( $clog2(DATA_W) - 1 ):0 ]  data_mod_i,
   input  logic                              data_val_i,
 
@@ -12,8 +12,6 @@ module serializer #(
   output logic                              busy_o 
 );
 
-localparam MAX_WORD_LEN = 4'd15;
-
 logic [( $clog2(DATA_W)     ):0] num_cnt;
 logic [( $clog2(DATA_W) - 1 ):0] data_mod_cpy;
 bit finished;
@@ -21,7 +19,7 @@ bit finished;
 always_comb
   begin
     if ( !data_mod_i )
-      data_mod_cpy = MAX_WORD_LEN;
+      data_mod_cpy = DATA_W;
     else
       data_mod_cpy = data_mod_i - 1'b1;
   end
@@ -32,7 +30,12 @@ always_comb
     if ( srst_i )
       finished = 1'b1;
     else if ( ( data_val_i ) )
-      finished = 1'b0;
+      begin
+        if ( ( data_mod_i == 1 ) || ( data_mod_i == 2 ) )
+          finished = 1'b1;
+        else
+          finished = 1'b0;
+      end
     else if ( (num_cnt == data_mod_cpy + 1'b1) )
       // finished sending numbers  
       finished = 1'b1;
@@ -55,7 +58,7 @@ always_ff @( posedge clk_i )
         if ( finished )
           ser_data_o <= 1'b0;
         else
-          ser_data_o <= data_i[MAX_WORD_LEN - num_cnt];
+          ser_data_o <= data_i[DATA_W - num_cnt];
       end
   end
 
