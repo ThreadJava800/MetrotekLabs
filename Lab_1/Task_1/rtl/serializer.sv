@@ -47,33 +47,59 @@ always_comb
       end
   end
 
+// ser_data_o block
 always_ff @( posedge clk_i )
   begin
-    // reset => default state
     if ( srst_i )
-      begin
-        ser_data_o     <= 1'b0;
-        ser_data_val_o <= 1'b0;  // data not valid
-        busy_o         <= 1'b0;  // module is not busy
-
-        num_cnt        <= 4'b0;
-      end
-
-    if ( finished )
-      begin
-        busy_o         <= 1'b0;
-        ser_data_val_o <= 1'b0;
-        ser_data_o     <= 1'b0;
-
-        num_cnt        <= 4'b0;
-      end
+      ser_data_o <= 1'b0;
     else
       begin
-        busy_o <= 1'b1;
+        if ( finished )
+          ser_data_o <= 1'b0;
+        else
+          ser_data_o <= data_i[MAX_WORD_LEN - num_cnt];
+      end
+  end
 
-        ser_data_o     <= data_i[MAX_WORD_LEN - num_cnt];
-        ser_data_val_o <= 1'b1;
-        num_cnt        <= num_cnt + 1'b1;  // move to next number
+// ser_data_val_o block
+always_ff @( posedge clk_i )
+  begin
+    if ( srst_i )
+      ser_data_val_o <= 1'b0;
+    else
+      begin
+        if ( finished )
+          ser_data_val_o <= 1'b0;
+        else
+          ser_data_val_o <= 1'b1;
+      end
+  end
+
+// busy_o block
+always_ff @( posedge clk_i )
+  begin
+    if ( srst_i )
+      busy_o <= 1'b0;
+    else
+      begin
+        if ( finished )
+          busy_o <= 1'b0;
+        else
+          busy_o <= 1'b1;
+      end
+  end
+
+// num_cnt block
+always_ff @( posedge clk_i )
+  begin
+    if ( srst_i )
+       num_cnt <= 4'b0;
+    else
+      begin
+        if ( finished )
+          num_cnt <= 4'b0;
+        else
+          num_cnt <= num_cnt + 1'b1;
       end
   end
 
