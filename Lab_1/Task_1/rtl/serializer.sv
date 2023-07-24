@@ -23,7 +23,7 @@ always_comb
     if ( !data_mod_i )
       data_mod_cpy = MAX_WORD_LEN;
     else
-      data_mod_cpy = data_mod_i;
+      data_mod_cpy = data_mod_i - 1'b1;
   end
 
 // this block recognises if output is finished or not
@@ -37,10 +37,12 @@ always_comb
       // finished sending numbers  
       finished = 1'b1;
     else
-      if ( busy_o )
-        finished = 1'b0;
-      else
-        finished = 1'b1;
+      begin
+        if ( busy_o )
+          finished = 1'b0;
+        else
+          finished = 1'b1;
+      end
   end
 
 // ser_data_o block

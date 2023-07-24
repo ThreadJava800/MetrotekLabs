@@ -1,5 +1,7 @@
 module serializer_tb;
 
+localparam TEST_NUMBER = 10; 
+
 bit           clk;
 
 logic         srst;
@@ -19,6 +21,9 @@ logic ser_data;
 logic ser_data_val;
 logic busy;
 
+bit [15:0] testValue;
+bit [3:0]  testMod;
+
 serializer DUT (
   .clk_i          (clk),
   .srst_i         (srst),
@@ -30,47 +35,86 @@ serializer DUT (
   .busy_o         (busy)
 );
 
-initial
-  begin
-    automatic int test_cnt  = 0;
+typedef struct {
+  logic [15:0] data_i_test;
+  logic [3 :0] data_mod_test;
+  logic        data_val_test;
+} input_data;
 
-    srst <= 1'b1;
-    ##1 srst <= 1'b0;
+task fill_mailbox ( mailbox #( input_data ) tests );
+  for ( int i = 0; i < TEST_NUMBER; i++ )
+    begin
+      input_data test;
 
-    repeat ( 10 )
-      begin
-        automatic bit [15:0] testValue = $urandom_range(131071, 0);
-        automatic bit [3:0]  testMod   = $urandom_range(15, 0);
-        automatic bit        success   = 1'b1;
+      test.data_i_test   = $urandom_range( ( 2**16 - 1 ), 0 );
+      test.data_mod_test = $urandom_range( 3, 0 );
 
-        data     <= testValue;
-        data_mod <= testMod;
-        data_val <= 1'b1;
+      tests.put( test );
+    end
+endtask
 
-        ##1;
+bit         success;
+int         success_cnt;
+logic [3:0] temp_mod;
 
-        data_val <= 1'b0;
+task test ( mailbox #( input_data ) tests );
+  while ( tests.num() > 0 )
+    begin
+      input_data test;
+      tests.get( test );
 
-        for ( int i = 0; i <= testMod; i++ )
-          begin
-            // $display ("%d %d %d", testValue, testValue[15 - i], ser_data);
-            if ( ( ser_data != testValue[15 - i] ) || ( !ser_data_val ) || ( !busy ) )
-              begin
-                $display( "Error: test: data_i=%d data_mod_i=%d number_pos=%d", testValue, testMod, i );
-                $display( "\t Expected: ser_data_o=%d, ser_data_val=1, busy_o=1 ", testValue[15 - i] );
-                $display( "\t Got: ser_data_o=%d, ser_data_val=%d, busy_o=%d ", ser_data, ser_data_val, busy );
+      data     = test.data_i_test;
+      data_mod = test.data_mod_test;
 
-                success = 1'b0;;
-              end
-            ##1;
-          end
+      data_val = 1'b1;
+      ##1;
+      data_val = 1'b0;
+
+      success = 1'b1;
+
+      temp_mod = (data_mod == 4'b0) ? 4'd15 : ( data_mod - 1'b1 );
+
+      for ( int i = 0; i < temp_mod; i++ )
+        begin
+          if ( ( ser_data_val ) && ( busy ) )
+            begin
+              if ( ser_data != data[15 - i] )
+                begin
+                  $display( "Incorrect value: test: %d, pos: %d\n
+                             Expected: %d\n
+                             Got: %d", data, i, data[15 - i], ser_data);
+
+                  success = 1'b0;
+                end
+            end
+          else
+            begin
+              $display( "Incorrect support signals: test: %d, pos: %d\n
+                         Expected: ser_data_val = 1, busy = 1\n
+                         Got: ser_data_val = %d, busy = %d", data, i, ser_data_val, busy);
+
+              success = 1'b0;
+            end
+        end
 
         if ( success )
-          test_cnt++;
-      end
+          success_cnt++;
+    end
 
-    if ( test_cnt == 10 )
-        $display( "All tests passed!" );
+    if ( success == TEST_NUMBER )
+      $display( "All tests were successful!" );
+endtask
+
+mailbox #( input_data ) test_box = new();
+
+initial
+  begin
+    srst <= 1'b1;
+    ##1;
+    srst <= 1'b0;
+
+    fill_mailbox( test_box );
+    test( test_box );
   end
 
 endmodule
