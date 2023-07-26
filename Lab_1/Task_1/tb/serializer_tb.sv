@@ -1,5 +1,7 @@
 module serializer_tb;
 
+parameter TEST_NUM = 2 ** 16;
+
 bit           clk;
 
 logic         srst;
@@ -35,34 +37,51 @@ bit [3:0]  testMod;
 bit        success;
 
 int test_mod_cycle;
+int test_cnt  = 0;
 
 initial
   begin
-    automatic int test_cnt  = 0;
+    srst = 1'b1;
+    ##1 srst = 1'b0;
 
-    srst <= 1'b1;
-    ##1 srst <= 1'b0;
+    ##2;
 
-    for ( int i = 0; i < 2 ** 16; i++ )
+        // data      = 'd32768 + 1;
+        // data_mod  = 0;
+        // data_val  = 1'b1;
+
+        // ##1;
+
+        // data_val  = 1'b0;
+        // data_mod = 13;
+        // data = 123782;
+
+        // for (int i = 0; i <= 15; i++)
+        //   $display(data[5'd16 - 1 - i]);
+
+    for ( int i = 0; i < TEST_NUM; i++ )
       begin
-        testValue = i;
+        // testValue = i;
+        testValue = $urandom_range(2**16 - 1, 0);
         testMod   = $urandom_range(15, 0);
         success   = 1'b1;
 
-        data     <= testValue;
-        data_mod <= testMod;
-        data_val <= 1'b1;
+        data      = testValue;
+        data_mod  = testMod;
+        data_val  = 1'b1;
 
         ##1;
 
-        data_val <= 1'b0;
+        data_val  = 1'b0;
+        data      = 0;
+        data_mod  = 0;
 
         test_mod_cycle = ( testMod == 0 ) ? 16 : testMod;
 
         for ( int i = 0; i < test_mod_cycle; i++ )
           begin
             // $display ("%d %d %d", testValue, testValue[15 - i], ser_data);
-            if ( ( data_mod != 1 ) && ( data_mod != 2 ) )
+            if ( ( testMod != 1 ) && ( testMod != 2 ) )
               begin
                 if ( ( ser_data != testValue[15 - i] ) || ( !ser_data_val ) || ( !busy ) )
                   begin
@@ -81,7 +100,7 @@ initial
                     $display( "\t Expected: ser_data_o=%d, ser_data_val=1, busy_o=1 ", testValue[15 - i] );
                     $display( "\t Got: ser_data_o=%d, ser_data_val=%d, busy_o=%d ", ser_data, ser_data_val, busy );
     
-                    success = 1'b0;;
+                    success = 1'b0;
                   end
               end
             ##1;
@@ -91,7 +110,7 @@ initial
           test_cnt++;
       end
 
-    if ( test_cnt == 2 ** 16 )
+    if ( test_cnt == TEST_NUM )
         $display( "All tests passed!" );
   end
 
