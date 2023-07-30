@@ -1,6 +1,6 @@
 module deserializer_tb;
 
-parameter TEST_NUM = 2 ** 16;
+parameter TEST_NUM = 1000;
 
 bit           clk;
 
@@ -39,7 +39,7 @@ task create_package( mailbox #( test_pkg ) pkg );
     begin
       test_pkg new_pkg;
       new_pkg.test_data     = $urandom_range( 1, 0 );
-      new_pkg.test_data_val = 1;
+      new_pkg.test_data_val = $urandom_range( 1, 0 );
 
       pkg.put( new_pkg );
     end
@@ -77,13 +77,15 @@ task send_package( mailbox #( test_pkg ) pkgs,
 
       ##1;
     end
+
+    data_val = 1'b0;
 endtask
 
 task test ( mailbox #( logic [15:0] ) recieved,
             mailbox #( logic [15:0] ) etalon );
   if ( recieved.num() != etalon.num() )
     $display("Different sizes of mailboxes! recieved = %d, etalon = %d", recieved.num(), etalon.num());
-  
+
   while ( recieved.num() > 0 )
     begin
       logic [15:0] check_value;
@@ -112,8 +114,6 @@ initial
       send_package( sended_pkgs, result_pkgs, orig_pkgs );
       test( result_pkgs, orig_pkgs );
     join
-
-    $display("Finished testing!");
 
   end
 

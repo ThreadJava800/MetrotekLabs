@@ -33,9 +33,9 @@ always_comb
       DEFAULT:
         begin
           if ( data_val_i )
-            begin
-              next_state = IN_PROC;
-            end
+            next_state = IN_PROC;
+          else
+            next_state = state;
         end
       IN_PROC:
         begin
@@ -53,7 +53,7 @@ always_ff @( posedge clk_i )
     case ( state )
       DEFAULT:
         begin
-          bit_cnt <= 16'd0;
+          bit_cnt <= 5'd0;
         end
       IN_PROC:
         begin
