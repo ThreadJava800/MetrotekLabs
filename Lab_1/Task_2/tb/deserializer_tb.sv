@@ -16,7 +16,7 @@ default clocking cb
   @( posedge clk );
 endclocking
 
-logic deser_data;
+logic [15:0] deser_data;
 logic deser_data_val;
 
 deserializer DUT (
