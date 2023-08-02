@@ -39,7 +39,7 @@ task create_package( mailbox #( test_pkg ) pkg );
     begin
       test_pkg new_pkg;
       new_pkg.test_data     = $urandom_range( 1, 0 );
-      new_pkg.test_data_val = 1;
+      new_pkg.test_data_val = $urandom_range( 1, 0 );
 
       pkg.put( new_pkg );
     end
@@ -49,19 +49,14 @@ int        bit_cnt = 0;
 bit [15:0] etalon_logic;
 
 task send_package( mailbox #( test_pkg ) pkgs,
-                   mailbox #( logic [15:0] ) recieved,
                    mailbox #( logic [15:0] ) etalon );
-
-  while (pkgs.num() > 0) 
+  while ( pkgs.num() > 0 ) 
     begin
       test_pkg pkg;
       pkgs.get( pkg );
 
       data     = pkg.test_data;
       data_val = pkg.test_data_val;
-
-      if ( deser_data_val )
-        recieved.put( deser_data );
 
       if ( data_val )
         begin
@@ -73,6 +68,7 @@ task send_package( mailbox #( test_pkg ) pkgs,
         begin
           etalon.put( etalon_logic );
           bit_cnt = 0;
+          ##1;
         end
 
       ##1;
@@ -81,22 +77,42 @@ task send_package( mailbox #( test_pkg ) pkgs,
     data_val = 1'b0;
 endtask
 
+int collect_cnt = 0;
+task collect_data ( mailbox #( logic [15:0] ) recieved );
+  while ( collect_cnt < TEST_NUM * 16 )
+    begin
+      if ( deser_data_val )
+        begin
+          recieved.put( deser_data );
+        end
+      collect_cnt++;
+      ##1;
+    end
+endtask
+
+int test_cnt = 0;
 task test ( mailbox #( logic [15:0] ) recieved,
             mailbox #( logic [15:0] ) etalon );
-  if ( recieved.num() != etalon.num() )
-    $display("Different sizes of mailboxes! recieved = %d, etalon = %d", recieved.num(), etalon.num());
 
-  while ( recieved.num() > 0 )
+  while ( test_cnt < TEST_NUM * 16 )
     begin
-      logic [15:0] check_value;
-      logic [15:0] original;
+      if ( recieved.num() > 0 )
+        begin
+          logic [15:0] check_value;
+          logic [15:0] original;
+    
+          recieved.get( check_value );
+          etalon.get( original );
+    
+          if (check_value != original)
+            $display( "Error occured: orig = %d, got = %d", original, check_value );
+        end
 
-      recieved.get( check_value );
-      etalon.get( original );
-
-      if (check_value != original)
-        $display( "Error occured: orig = %d, got = %d", original, check_value );
+      ##1;
+      test_cnt++;
     end
+
+    $display( "Tests finished" );
 endtask
 
 mailbox #( test_pkg )     sended_pkgs = new();
@@ -111,7 +127,9 @@ initial
 
     fork
       create_package( sended_pkgs );
-      send_package( sended_pkgs, result_pkgs, orig_pkgs );
+      send_package( sended_pkgs, orig_pkgs );
+
+      collect_data( result_pkgs );
       test( result_pkgs, orig_pkgs );
     join
 
