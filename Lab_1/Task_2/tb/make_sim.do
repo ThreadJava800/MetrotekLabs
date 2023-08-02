@@ -6,4 +6,4 @@ vsim -c work.deserializer_tb
 add log -r *
 add wave -r *
 
-run 12000
+run -all

@@ -39,7 +39,7 @@ task create_package( mailbox #( test_pkg ) pkg );
     begin
       test_pkg new_pkg;
       new_pkg.test_data     = $urandom_range( 1, 0 );
-      new_pkg.test_data_val = $urandom_range( 1, 0 );
+      new_pkg.test_data_val = 1;
 
       pkg.put( new_pkg );
     end
