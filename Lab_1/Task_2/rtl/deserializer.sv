@@ -11,8 +11,8 @@ module deserializer #(
 );
 
 bit [ $clog2(DATA_W) :0] bit_cnt;
-bit                          data_val_cpy;
-bit                          prev_val;
+bit                      data_val_cpy;
+bit                      prev_val;
 
 // bit_cnt block
 always_ff @( posedge clk_i )
