@@ -1,5 +1,5 @@
 module deserializer #(
-    parameter DATA_W = 5'd16
+    parameter DATA_W = 16
 ) (
   input  logic                       clk_i,
   input  logic                       srst_i,
@@ -18,7 +18,7 @@ logic                          prev_val;
 always_ff @( posedge clk_i )
   begin
     if ( srst_i )
-      bit_cnt <= 4'd0;
+      bit_cnt <= 0;
     else
       begin
         if ( data_val_i )
@@ -35,7 +35,7 @@ always_ff @( posedge clk_i )
 always_ff @( posedge clk_i )
   begin
     if ( srst_i )
-      deser_data_o <= 4'd0;
+      deser_data_o <= 0;
     else
       begin
         if ( data_val_i )
