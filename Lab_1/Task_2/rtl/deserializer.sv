@@ -1,5 +1,5 @@
 module deserializer #(
-    parameter time DATA_W = 5'd16
+    parameter DATA_W = 5'd16
 ) (
   input  logic                       clk_i,
   input  logic                       srst_i,
@@ -12,7 +12,6 @@ module deserializer #(
 
 logic [ $clog2(DATA_W) - 1 :0] bit_cnt;
 logic [ $clog2(DATA_W) - 1 :0] prev_bit_cnt;
-logic                          data_val_cpy;
 logic                          prev_val;
 
 // bit_cnt block
@@ -40,10 +39,10 @@ always_ff @( posedge clk_i )
     else
       begin
         if ( data_val_i )
-          deser_data_o <= {deser_data_o[14:0], data_i};
+          deser_data_o <= {deser_data_o[DATA_W - 2:0], data_i};
       end
   end
 
-assign deser_data_val_o = (  ( prev_bit_cnt == 4'd15 ) && ( bit_cnt == 4'd0 ) && prev_val );
+assign deser_data_val_o = ( ( prev_bit_cnt == DATA_W - 1'b1 ) && ( bit_cnt == 4'd0 ) && prev_val );
 
 endmodule
