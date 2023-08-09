@@ -37,13 +37,29 @@ typedef struct {
   logic                        test_data_val;
 } test_pkg;
 
+int clk_delay;
+bit clk_val;
+int clk_cnt;
 task create_package( mailbox #( test_pkg ) pkg );
+  clk_delay = 0;
+  clk_cnt   = 0;
+  clk_val   = 0;
+
   for ( int i = 0; i < TEST_NUM; i++ )
     begin
       test_pkg new_pkg;
       new_pkg.test_data     = $urandom_range( 2**TEST_WIDTH - 1, 0 );
-      new_pkg.test_data_val = 1;
 
+      if ( clk_cnt >= clk_delay )
+        begin
+          clk_delay = $urandom_range( 200, 1 );
+          clk_cnt   = 0;
+          clk_val   = $urandom_range( 1, 0 );
+        end
+      else
+        new_pkg.test_data_val = clk_val;
+
+      clk_cnt++;
       pkg.put( new_pkg );
     end
 endtask
@@ -63,35 +79,38 @@ task send_package( mailbox #( test_pkg ) pkgs,
 
       data     = pkg.test_data;
       data_val = pkg.test_data_val;
-
-      left_val  = 1'b0;
-      right_val = 1'b0;
-
-      for ( int i = TEST_WIDTH - 1; i >= 0; i-- )
+      
+      if ( data_val )
         begin
-          if ( left_val )
-            etalon_left[i] = 1'b0;
-          else
-            etalon_left[i] = data[i];
-  
-          if ( data[i] == 1'b1 )
-            left_val = 1'b1;
+          left_val  = 1'b0;
+          right_val = 1'b0;
+
+          for ( int i = TEST_WIDTH - 1; i >= 0; i-- )
+            begin
+              if ( left_val )
+                etalon_left[i] = 1'b0;
+              else
+                etalon_left[i] = data[i];
+      
+              if ( data[i] == 1'b1 )
+                left_val = 1'b1;
+            end
+      
+          etalon.put( etalon_left );
+
+          for ( int i = 0; i < TEST_WIDTH; i++ )
+          begin
+            if ( right_val )
+              etalon_right[i] = 1'b0;
+            else
+              etalon_right[i] = data[i];
+    
+            if ( data[i] == 1'b1 )
+              right_val = 1'b1;
+          end
+    
+          etalon.put( etalon_right );
         end
-  
-      etalon.put( etalon_left );
-
-      for ( int i = 0; i < TEST_WIDTH; i++ )
-      begin
-        if ( right_val )
-          etalon_right[i] = 1'b0;
-        else
-          etalon_right[i] = data[i];
-
-        if ( data[i] == 1'b1 )
-          right_val = 1'b1;
-      end
-
-      etalon.put( etalon_right );
 
       ##1;
     end
@@ -104,7 +123,7 @@ task collect_data ( mailbox #( logic [TEST_WIDTH - 1:0] ) recieved );
   ##1;
   while ( collect_cnt < TEST_NUM )
     begin
-      if ( data_val )
+      if ( data_val_out )
         begin
           recieved.put( data_left );
           recieved.put( data_right );
