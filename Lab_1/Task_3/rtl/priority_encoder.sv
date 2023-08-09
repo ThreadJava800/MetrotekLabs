@@ -1,5 +1,5 @@
 module priority_encoder #(
-    parameter int WIDTH
+    parameter int WIDTH = 32
 ) (
   input  logic                 clk_i,
   input  logic                 srst_i,
