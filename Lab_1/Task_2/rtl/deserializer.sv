@@ -1,5 +1,5 @@
 module deserializer #(
-    parameter DATA_W = 16
+    parameter int DATA_W = 16
 ) (
   input  logic                       clk_i,
   input  logic                       srst_i,
@@ -43,6 +43,6 @@ always_ff @( posedge clk_i )
       end
   end
 
-assign deser_data_val_o = ( ( prev_bit_cnt == DATA_W - 1'b1 ) && ( bit_cnt == 4'd0 ) && prev_val );
+assign deser_data_val_o = ( ( bit_cnt == 4'd0 ) && prev_val );
 
 endmodule
