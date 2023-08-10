@@ -33,7 +33,7 @@ always_comb
     for ( int i = 0; i < WIDTH; i++ )
       begin
         if ( data_i[i] == 1'b1 )
-          bit_cnt = bit_cnt + 1;
+          bit_cnt = bit_cnt + ( $clog2(WIDTH) )'( 1 );
       end
   end
 
