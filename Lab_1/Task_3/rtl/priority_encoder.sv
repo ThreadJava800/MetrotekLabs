@@ -27,21 +27,11 @@ always_ff @( posedge clk_i )
 
 // set data_left
 always_ff @( posedge clk_i )
-  begin
-    if ( srst_i )
-      data_left_o <= 1'b0;
-    else
-      data_left_o <= data_left;
-  end
+  data_left_o <= data_left;
 
 // set data_right
 always_ff @( posedge clk_i )
-  begin
-    if ( srst_i )
-      data_right_o <= 1'b0;
-    else
-      data_right_o <= data_right;
-  end
+  data_right_o <= data_right;
 
 // generate data_left
 always_comb 

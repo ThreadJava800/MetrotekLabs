@@ -77,14 +77,7 @@ task send_package( mailbox #( test_pkg ) pkgs,
 
       if ( data_val )
         begin
-          etalon_cnt = 0;
-    
-          for ( int i = 0; i < TEST_WIDTH; i++ )
-            begin
-              if ( data[i] == 1'b1 )
-                etalon_cnt++;
-            end
-  
+          etalon_cnt = $countones(data);
           etalon.put( etalon_cnt );
         end
 

@@ -23,12 +23,7 @@ always_ff @( posedge clk_i )
 
 // set data_o
 always_ff @( posedge clk_i )
-  begin
-    if ( srst_i )
-      data_o <= 1'b0;
-    else
-      data_o <= bit_cnt;
-  end
+  data_o <= bit_cnt;
 
 // generate bit_cnt
 always_comb 
@@ -38,7 +33,7 @@ always_comb
     for ( int i = 0; i < WIDTH; i++ )
       begin
         if ( data_i[i] == 1'b1 )
-          bit_cnt++;
+          bit_cnt = bit_cnt + 1;
       end
   end
 

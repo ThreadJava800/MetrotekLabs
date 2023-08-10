@@ -1,6 +1,6 @@
 module priority_encoder_tb;
 
-parameter int TEST_NUM   = 1000;
+parameter int TEST_NUM   = 10000;
 parameter int TEST_WIDTH = 32;
 
 bit clk;
@@ -48,7 +48,7 @@ task create_package( mailbox #( test_pkg ) pkg );
   for ( int i = 0; i < TEST_NUM; i++ )
     begin
       test_pkg new_pkg;
-      new_pkg.test_data     = $urandom_range( 2**TEST_WIDTH - 1, 0 );
+      new_pkg.test_data     = $urandom_range( 2**TEST_WIDTH - 1, 1 );
 
       if ( clk_cnt >= clk_delay )
         begin
@@ -65,10 +65,8 @@ task create_package( mailbox #( test_pkg ) pkg );
 endtask
 
 int                      bit_cnt   = 0;
-bit                      left_val  = 0;
-bit                      right_val = 0;
-bit [ TEST_WIDTH - 1 :0] etalon_left;
-bit [ TEST_WIDTH - 1 :0] etalon_right;
+bit [ TEST_WIDTH+1 :0] etalon_left;
+bit [ TEST_WIDTH+1 :0] etalon_right;
 
 task send_package( mailbox #( test_pkg ) pkgs,
                    mailbox #( logic [TEST_WIDTH - 1:0] ) etalon );
@@ -82,33 +80,19 @@ task send_package( mailbox #( test_pkg ) pkgs,
       
       if ( data_val )
         begin
-          left_val  = 1'b0;
-          right_val = 1'b0;
+          etalon_left  = 2 ** TEST_WIDTH;  // poison value that can't be equal to pos num
+          etalon_right = 2 ** TEST_WIDTH;
 
-          for ( int i = TEST_WIDTH - 1; i >= 0; i-- )
+          for ( int i = 0; i < TEST_WIDTH; i++ )
             begin
-              if ( left_val )
-                etalon_left[i] = 1'b0;
-              else
-                etalon_left[i] = data[i];
-      
-              if ( data[i] == 1'b1 )
-                left_val = 1'b1;
+              if ( ( etalon_right == 2 ** TEST_WIDTH ) && ( data[i] == 1 ) )
+                etalon_right = i;
+
+              if ( data[i] == 1 )
+                etalon_left = i;
             end
       
           etalon.put( etalon_left );
-
-          for ( int i = 0; i < TEST_WIDTH; i++ )
-          begin
-            if ( right_val )
-              etalon_right[i] = 1'b0;
-            else
-              etalon_right[i] = data[i];
-    
-            if ( data[i] == 1'b1 )
-              right_val = 1'b1;
-          end
-    
           etalon.put( etalon_right );
         end
 
@@ -147,8 +131,14 @@ task test ( mailbox #( logic [TEST_WIDTH - 1:0] ) recieved,
           recieved.get( check_value );
           etalon.get( original );
     
-          if (check_value != original)
-            $display( "Error occured: orig = %d, got = %d", original, check_value );
+          for ( int i = 0; i < TEST_WIDTH; i++ )
+            begin
+              if ( check_value[i] == 1 )
+                begin
+                  if ( original != i )
+                    $display( "Error! met one on a wrong position: val = %d, pos = %d, await = %d", check_value, i, original );
+                end
+            end
         end
 
       ##1;
