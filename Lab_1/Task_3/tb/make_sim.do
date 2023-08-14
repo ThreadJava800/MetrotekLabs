@@ -6,4 +6,4 @@ vsim -c work.priority_encoder_tb
 add log -r *
 add wave -r *
 
-run -all
+run 210000

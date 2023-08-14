@@ -56,8 +56,9 @@ task create_package( mailbox #( test_pkg ) pkg );
           clk_cnt   = 0;
           clk_val   = $urandom_range( 1, 0 );
         end
-      else
-        new_pkg.test_data_val = clk_val;
+
+
+      new_pkg.test_data_val = clk_val;
 
       clk_cnt++;
       pkg.put( new_pkg );

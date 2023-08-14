@@ -6,4 +6,4 @@ vsim -c work.bit_population_counter_tb
 add log -r *
 add wave -r *
 
-run -all
+run 20000
